@@ -1,0 +1,13 @@
+{
+    "path" : "~/git/R/indmortality/R",
+    "sortOrder" : [
+        {
+            "ascending" : false,
+            "columnIndex" : 4
+        },
+        {
+            "ascending" : true,
+            "columnIndex" : 2
+        }
+    ]
+}
