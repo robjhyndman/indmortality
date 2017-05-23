@@ -11,21 +11,24 @@
 \alias{wa}
 \title{Lists of demogdata objects for all Australian states, 2001-2007}
 \description{
-Objects: \code{aus}, \code{nsw}, \code{vic}, \code{qld}, \code{wa},
-\code{sa} and \code{nt}.
+Objects: \code{aus}, \code{nsw}, \code{vic}, \code{sa}, \code{wa}, 
+\code{nt}, and \code{qld}. 
+Note that there is insufficient data to produce similar objects for Tasmania and the ACT.
+These are demogdata objects, based on backcast population estimates. 
+The rates are smoothed over age using \code{\link[demography]{smooth.demogdata}}. 
+For information about demogdata objects, see \code{\link[demography]{demogdata}}.
 }
 \details{
-These are lists of demogdata objects. Each state contains four demogdata
-objects, corresponding to the M, H, A and N cuts of the indigenous deaths
-data. For information about demogdata objects, see
-\code{\link[demography]{demogdata}}.
-
 Demogdata objects constructed using \code{\link{make.demogdata}} using
-2001-2007 data from \code{\link{ideaths}} and \code{\link{ipop}}.
+2001-2010 data from \code{\link{ideaths}} and \code{\link{ipop}}.
 }
 \examples{
 
-plot(nsw$M,'male')
+plot(aus,'male')
+
+# To create similar objects using interpolated population,
+# use, for example,
+nsw2 <- make.demogdata(state="NSW", population="interpolated")
 
 }
 \keyword{datasets}

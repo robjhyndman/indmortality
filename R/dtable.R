@@ -4,33 +4,18 @@
 
 #' Function to make deaths tables for subsets of data.
 #' 
-#' Returns array with ages and years and (depending on the arguments) states,
-#' sex and cut. Default arguments will return the complete array. Use the
-#' argument to specify subsets of the array. Uses all available years unless
-#' aveyear=TRUE, in which case it will return average deaths across years.
+#' Returns vector of total deaths by single-year of age. 
+#' Deaths are counted using the method adopted for the 
+#' ``Enhanced Mortality Database'', adjusting for the 
+#' under-identification of Indigenous deaths on the 
+#' National Death Index.
 #' 
-#' 
-#' @param state If "ALL", the function will return all deaths with state as a
-#' dimension of the array. Otherwise the function will return all deaths from
-#' the state indicated but with state not a dimension of the array.
-#' @param sex If "ALL", the function will return all deaths with sex as a
-#' dimension of the array. Otherwise the function will return all deaths from
-#' the sex indicated but with sex not a dimension of the array.
-#' @param cut If "ALL", the function will return all deaths with state as a
-#' dimension of the array. Otherwise the function will return all deaths from
-#' the state indicated but with state not a dimension of the array.
-#' @param year Which years to be returned. Default is all available years.
-#' years is always a dimension of the returned array.
+#' @param state The function will return all deaths from the state indicated.
+#' @param sex The function will return all deaths from the sex indicated.
+#' @param year Which years to be counted. Default is all available years.
 #' @param upper.age Deaths are cumulated for higher ages into this upper age
 #' group.
-#' @param aveyear If TRUE, the deaths are averaged across years.
-#' @param deaths Matrix containing all deaths with indigenous classification in
-#' Australia from 2001-2007 in the same format as \code{\link{deaths}}.
-#' @param cumulative Indicates if the deaths are to be cumulated up to the
-#' specified "cut", or whether the marginal deaths associated with that cut are
-#' to be returned.
-#' @return A numerical array with death counts in each cell. Dimensions of the
-#' array are age, year and then (depending on the arguments) state,sex,cut.
+#' @return A numerical vector with death counts in each cell. 
 #' @author Rob J Hyndman <Rob.Hyndman@@monash.edu>
 #' @references Choi, C., Hyndman, R.J., Smith, L., and Zhao, K. (2010) \emph{An
 #' enhanced mortality database for estimating indigenous life expectancy}.
@@ -45,107 +30,136 @@
 deathstable <- function(
   state=c("AUS","ACT","NSW","NT","QLD","SA","TAS","VIC","WA"),
   sex=c("female","male","total"),
-  linked=c(NA,TRUE,FALSE),
-  classified=c(NA,"N","Y","U"),
-  year=NULL,
-  aveyear=FALSE,
-  upper.age=100,
-  cumulative=TRUE,
-  deaths=indmortality::ideaths)
+  year=2001:2010,
+  upper.age=115)
 {
+  # Check arguments
   state <- match.arg(state)
   sex <- match.arg(sex)
-  maxage <- max(deaths$Age,na.rm=TRUE)
 
-  # Subset on year
-  nyear <- deaths$RegYear
-  dyear <- sort(unique(nyear))
+  # Maximum age at death
+  maxage <- max(ideaths$Age,na.rm=TRUE)
+
+  # Make a copy of ideaths to subset
+  deaths <- ideaths
+
+  # Subset data on state
+  if(state != "AUS")
+    deaths <- subset(deaths,State==toupper(state))
+
+  # Subset data on sex
+  if(sex=="male")
+    deaths <- subset(deaths,Sex=="Male")
+  else if(sex=="female")
+    deaths <- subset(deaths,Sex=="Female")
+
+  # Create year as a factor
+  deaths$Year <- as.factor(deaths$RegYear)
+
+  # Make age a factor and change NA to "missing"
+  deaths$age1 <- factor(deaths$Age, exclude=NULL,
+                        levels=c(paste(0:maxage),"missing"))
+  deaths$age1[is.na(deaths$age1)] <- "missing"
+
+  # Check available years
+  dyear <- sort(unique(deaths$RegYear))
   if(is.null(year))
     year <- dyear
   else if(sum(!is.element(year,dyear)) > 0)
     warning("Some years unavailable")
-  deaths <- subset(deaths,is.element(nyear,year))
-  deaths$Year <- as.factor(deaths$RegYear)
 
-  # Subset on state
-  if(state != "AUS")
-    deaths <- subset(deaths,deaths$State==state)
+  # Save gains and losses for later
+  maxyear <- max(year)
+  minyear <- min(year)
+  gains <- subset(deaths, deaths$DeathYear < minyear - 0.01 &
+                          deaths$RegYear > minyear - 0.01 &
+                          deaths$RegYear < maxyear + 0.01)
+  losses <- subset(deaths, deaths$RegYear > maxyear + 0.01 &
+                     deaths$DeathYear > minyear - 0.01 &
+                     deaths$DeathYear < maxyear + 0.01)
 
-  # Subset on sex
-  if(sex=="male")
-    deaths <- subset(deaths,deaths$Sex=="M")
-  else if(sex=="female")
-    deaths <- subset(deaths,deaths$Sex=="F")
+  # Subset on years requested
+  deaths <- subset(deaths, deaths$RegYear > minyear - 0.01 &
+                           deaths$RegYear < maxyear + 0.01)
 
-  # Subset on linked
-  if(!is.na(linked))
-  {
-    if(linked)
-      deaths <- subset(deaths, deaths$LinkStatus=="Linked")
-    else
-      deaths <- subset(deaths, deaths$LinkStatus=="Unlinked")
-  }
-
-  # Subset on indigenous status
-  if(!is.na(classified))
-    deaths <- subset(deaths, deaths$Indigenous==classified)
-
+  # Check that we still have some deaths left after subsetting
   if(nrow(deaths)==0)
     stop("No deaths selected")
 
-  # Make age a factor
-  deaths$age1 <- factor(deaths$Age, exclude=NULL, levels=c(paste(0:maxage),"missing"))
-  deaths$age1[is.na(deaths$age1)] <- "missing"
+  # Sum up data by age, indigenous, linked (i.e., total over sex, state and year)
+  tab <- xtabs(~ age1 + Indigenous + Linked, data = deaths)
 
+  ##################################################################
+  ###### Now follow spreadsheet logic
+  ###### as in "Enhancing_Indigenous Deaths_Phase4_2001_2005.xlsx"
+  ##################################################################
 
-  # Sum up data where age is not missing
-  tab <- xtabs(~ age1 + Year + Sex + State, data = deaths)
+  ###### Linked worksheet
+  linked <- tab[,,"TRUE"]
 
-  if(state!="AUS")
-    tab <- tab[,,,state,drop=FALSE]
-  if(sex=="male")
-    tab <- tab[,,"M",,drop=FALSE]
-  else if(sex=="female")
-    tab <- tab[,,"F",,drop=FALSE]
+  # Distribute missing ages across other ages proportionally
+  linked <- apply(linked,2,distribute.deaths.vec)
 
-  tab <- apply(tab,2:length(dim(tab)),distribute.deaths.vec)
+  # Add in mis-classified deaths
+  misclass <- subset(deaths, Misclassified)
+  tabmiss <- xtabs(~ age1 + Indigenous, data = misclass)
+  # Distribute missing ages across other ages proportionally
+  tabmiss <- apply(tabmiss,2:length(dim(tabmiss)),distribute.deaths.vec)
+  misclassN <- tabmiss[,"N"]
+  misclassU <- tabmiss[,"U"]
+  pmisclassN <- misclassN / linked[,"N"]
+  pmisclassN[is.na(pmisclassN)] <- 0
+  pmisclassU <- misclassU / linked[,"U"]
+  pmisclassU[is.na(pmisclassU)] <- 0
+  linked.enhanced <- misclassN + misclassU + linked[,"Y"]
+
+  ###### Unlinked worksheet
+  unlinked <- tab[,,"FALSE"]
+
+  # Distribute missing ages across other ages proportionally
+  unlinked <- apply(unlinked,2,distribute.deaths.vec)
+
+  # Add in mis-classified deaths
+  misclassN <- pmisclassN * unlinked[,"N"]
+  misclassU <- pmisclassU * unlinked[,"U"]
+  unlinked.enhanced <- misclassN + misclassU + unlinked[,"Y"]
+
+  ###### Calculating gains/losses
+
+  # Sum up data by age, indigenous (i.e., total over sex, state and year)
+  tabg <- xtabs(~ age1 + Indigenous, data = gains)
+  tabl <- xtabs(~ age1 + Indigenous, data = losses)
+  netloss <- tabl-tabg
+
+  ###### Adjusting for net gains/losses
+
+  # Distribute missing ages across other ages proportionally
+  netloss <- apply(netloss,2,distribute.deaths.vec)
+
+  # Add in mis-classified deaths
+  misclassN <- pmisclassN * netloss[,"N"]
+  misclassU <- pmisclassU * netloss[,"U"]
+  netloss.enhanced <- misclassN + misclassU + netloss[,"Y"]
+
+  # Final enhanced number of deaths
+  enhanced <- linked.enhanced + unlinked.enhanced + netloss.enhanced
 
   # Aggregate upper ages
   if(upper.age < maxage)
   {
-    tab[upper.age+1,,,] <- apply(tab[(upper.age:maxage)+1,,,,drop=FALSE],2:4,sum)
-    tab <- tab[1:(upper.age+1),,,,drop=FALSE]
+    enhanced[upper.age+1] <- sum(enhanced[(upper.age:maxage)+1])
+    enhanced <- enhanced[1:(upper.age+1)]
     maxage <- upper.age
   }
-  dimnames(tab)[[1]][maxage+1] <- paste(dimnames(tab)[[1]][maxage+1],"+",sep="")
-
-  # Collapse results if required
-  dnames <- names(dimnames(tab)) <- c("Age","Year","Sex","State")
-  if(sex=="total")
+  else if(upper.age > maxage)
   {
-    dnames <- dnames[dnames!="Sex"]
-    tab <- apply(tab,dnames,sum)
+    enhanced <- c(enhanced, rep(0, upper.age-maxage))
+    maxage <- upper.age
   }
-  if(state=="AUS")
-  {
-    dnames <- dnames[dnames!="State"]
-    tab <- apply(tab,dnames,sum)
-  }
-  if(aveyear)
-  {
-    dnames <- dnames[dnames!="Year"]
-    tab <- apply(tab,dnames,mean)
-  }
+  names(enhanced) <- c(paste(0:(maxage-1)), paste(maxage,"+",sep=""))
 
-  # Add pro-rata deaths due to missing ages
-
-
-  # Remove dimensions of length 1
-  dl <- dim(tab)
-  tab <- apply(tab,which(dl>1),function(x){x})
-
-  # Return resulting table
-  return(tab)
+  # Return resulting death counts
+  return(enhanced)
 }
 
 # Find all deaths associated with missing ages and distribute across ages
@@ -156,6 +170,6 @@ distribute.deaths.vec <- function(x)
   miss <- names(x)=="missing"
   sumx <- sum(x[!miss])
   if(sumx > 0)
-    x[!miss] <- x[!miss] * sum(x)/sumx
+    x[!miss] <- x[!miss]/sumx * sum(x)
   return(x[!miss])
 }

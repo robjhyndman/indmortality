@@ -1,7 +1,7 @@
-Package: indmortality
+Package: indmortality2
 Type: Package
 Title: Indigenous mortality for Australia
-Version: 2.0
+Version: 2.02
 Author: Rob J Hyndman <Rob.Hyndman@monash.edu>
 Maintainer: Rob J Hyndman <Rob.Hyndman@monash.edu>
 Depends: R (>= 3.2.0), demography

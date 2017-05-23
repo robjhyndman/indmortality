@@ -5,47 +5,28 @@
 \title{Function to make deaths tables for subsets of data.}
 \usage{
 deathstable(state = c("AUS", "ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC",
-  "WA"), sex = c("female", "male", "total"), linked = c(NA, TRUE, FALSE),
-  classified = c(NA, "N", "Y", "U"), year = NULL, aveyear = FALSE,
-  upper.age = 100, cumulative = TRUE, deaths = indmortality::ideaths)
+  "WA"), sex = c("female", "male", "total"), year = 2001:2010,
+  upper.age = 115)
 }
 \arguments{
-\item{state}{If "ALL", the function will return all deaths with state as a
-dimension of the array. Otherwise the function will return all deaths from
-the state indicated but with state not a dimension of the array.}
+\item{state}{The function will return all deaths from the state indicated.}
 
-\item{sex}{If "ALL", the function will return all deaths with sex as a
-dimension of the array. Otherwise the function will return all deaths from
-the sex indicated but with sex not a dimension of the array.}
+\item{sex}{The function will return all deaths from the sex indicated.}
 
-\item{year}{Which years to be returned. Default is all available years.
-years is always a dimension of the returned array.}
-
-\item{aveyear}{If TRUE, the deaths are averaged across years.}
+\item{year}{Which years to be counted. Default is all available years.}
 
 \item{upper.age}{Deaths are cumulated for higher ages into this upper age
 group.}
-
-\item{cumulative}{Indicates if the deaths are to be cumulated up to the
-specified "cut", or whether the marginal deaths associated with that cut are
-to be returned.}
-
-\item{deaths}{Matrix containing all deaths with indigenous classification in
-Australia from 2001-2007 in the same format as \code{\link{deaths}}.}
-
-\item{cut}{If "ALL", the function will return all deaths with state as a
-dimension of the array. Otherwise the function will return all deaths from
-the state indicated but with state not a dimension of the array.}
 }
 \value{
-A numerical array with death counts in each cell. Dimensions of the
-array are age, year and then (depending on the arguments) state,sex,cut.
+A numerical vector with death counts in each cell.
 }
 \description{
-Returns array with ages and years and (depending on the arguments) states,
-sex and cut. Default arguments will return the complete array. Use the
-argument to specify subsets of the array. Uses all available years unless
-aveyear=TRUE, in which case it will return average deaths across years.
+Returns vector of total deaths by single-year of age. 
+Deaths are counted using the method adopted for the 
+``Enhanced Mortality Database'', adjusting for the 
+under-identification of Indigenous deaths on the 
+National Death Index.
 }
 \examples{
 

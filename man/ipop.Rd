@@ -8,27 +8,46 @@
 ABS Cat 3238.0
 }
 \description{
-This is a list of lists of matrices. The first level is the Australian
-states and the second level contains sex groups. Each matrix is of size
-101x6 with single ages in each row and calendar years in columns. For
-example, ipop$NSW$male contains the estimated indigenous male population for
-NSW in 2001-2006.
+This is a list of data frames each containing indigenous estimated 
+resident population (ERP) data, by state, sex and single-year of age, 
+from 0 to 115.
 }
 \details{
-Population estimates are based on ABS 3238.0 which gives five year age
-groups up to 85+. These are distributed according to earlier single-year-age
-estimates of the state indigenous populations, except for the ACT for which
-the five-year age groups are distributed according to the NSW
-single-year-age estimates of the indigenous population. The population for
-85+ in each state is distributed according to the general Australian age
-distribution for that age group.
+The first data frame contains cohort-interpolated Indigeneous ERP, 
+estimated from the 2001, 2006 and 2011 Census-based Indigenous ERPs. 
+Interpolation is linear between years for each cohort.
+
+The second data frame contains age-interpolated Indigeneous ERP, 
+estimated from the 2001, 2006 and 2011 Census-based Indigenous ERPs. 
+Interpolation is linear between years for each age.
+
+The third data frame contains backcasts of 2011 census-based Indigenous ERPs. 
+For each state, the total populations are split into males and females using 
+the sex ratios for each age computed from averaged census populations for 
+2001, 2006 and 2011.
+
+Each data frame contains columns \code{State}, \code{Sex}, \code{Age}, 
+\code{2001}, ... \code{2011}.
 }
 \examples{
 
-plot(0:100,ipop$NT$male[,"2003"],type="l",xlab="Age",ylab="Population",
-  main="Northern Territory 2003",col="blue")
-lines(0:100,ipop$NT$female[,"2003"],col="red")
-legend("topright",lty=1,col=c("blue","red"),legend=c("male","female"))
+plot(0:115, 
+  subset(ipop$Backcast, State=="NT" & Sex=="Male")[,"2003"],
+  type="l", 
+  xlab="Age", 
+  ylab="Population",
+  main="Northern Territory Male 2003", 
+  col="blue")
+lines(0:115, 
+  subset(ipop$Interpolated, State=="NT" & Sex=="Male")[,"2003"], 
+  col="red")
+lines(0:115, 
+  subset(ipop$Cohort, State=="NT" & Sex=="Male")[,"2003"], 
+  col="green")
 
+legend("topright",
+  lty=1,
+  col=c("blue","red","green"),
+  legend=c("Backcast","Interpolated","Cohort"))
 }
 \keyword{datasets}

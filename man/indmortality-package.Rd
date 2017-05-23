@@ -4,6 +4,7 @@
 \name{indmortality-package}
 \alias{indmortality-package}
 \alias{indmortality}
+\alias{indmortality2}
 \title{Australian indigenous mortality rates and life expectancies}
 \description{
 Package prepared for the Australian Institute of Health and Welfare to
@@ -11,16 +12,26 @@ compute life expectancy and other mortality-related information for the
 Australian indigenous population using simulation and nonparametric
 smoothing.
 }
-\details{
-\tabular{ll}{ Package: \tab indmortality\cr Type: \tab Package\cr Version:
-\tab 1.0\cr License: \tab GPL 2\cr }
-}
 \examples{
 
-nsw.nmd <- make.demogdata(state="NSW", cut="M", sex="male", aveyear=TRUE)
-plot(nsw.nmd)
-life.expectancy.mean(nsw.nmd)
-life.expectancy.ci(nsw.nmd)
+nsw <- make.demogdata(state="NSW", population="backcast")
+plot(nsw)
+life.expectancy.mean(nsw)
+life.expectancy.ci(nsw)
+
+# Complete calculation for Australia, 2001-2005.
+aus1 <- make.demogdata(state="AUS", year=2001:2005, aveyear=TRUE,
+   population="cohort")
+aus2 <- make.demogdata(state="AUS", year=2001:2005, aveyear=TRUE,
+   population="interpolated")
+aus3 <- make.demogdata(state="AUS", year=2001:2005, aveyear=TRUE,
+   population="backcast")
+life.expectancy.mean(aus1)
+life.expectancy.ci(aus1)
+life.expectancy.mean(aus2)
+life.expectancy.ci(aus2)
+life.expectancy.mean(aus3)
+life.expectancy.ci(aus3)
 
 }
 \references{
@@ -33,7 +44,5 @@ Report for Australian Institute of Health and Welfare.
 }
 \author{
 Rob J Hyndman <Rob.Hyndman@monash.edu>
-
-Maintainer: Rob J Hyndman <Rob.Hyndman@monash.edu>
 }
 \keyword{package}

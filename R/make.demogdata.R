@@ -1,199 +1,154 @@
 #' Make demogdata objects for particular states and years.
 #' 
-#' The function \code{make.demogdata} will return a demogdata object if
-#' \code{cut!="ALL"}. Otherwise it returns a list of demogdata objects for all
-#' cuts for a particular state.
-#' 
-#' If there are more years of deaths than years of population, then the last
-#' year of available population data is used to compute the rates for
-#' subsequent years.
+#' The function \code{make.demogdata} will return a demogdata object 
+#' for the given state and years.
 #' 
 #' @param state Character code indicating state or territory of Australia, or
 #' "AUS" indicating the whole of Australia.
-#' @param sex If "ALL", the function will return all sexes as part of each
-#' demogdata object. Otherwise the function will return only the sex indicated.
-#' @param cut Which cut of data to use. If "ALL", then a list of demogdata
-#' objects is returned.
 #' @param year Years to include in the demogdata object. The default is to
-#' include all available years from the deaths matrix.
-#' @param aveyear Logical value indicating whether results should be averaged
-#' across years. Default is FALSE.
+#' include all available years from the \link{ideaths} database.
+#' @param aveyear Logical value indicating whether deaths and population numbers
+#' should be averaged across years. Default is FALSE.
 #' @param upper.age Upper age group, by default set to 100+.
 #' @param smooth Logical value indicating whether mortality rates should be
 #' smoothed using penalized regression splines. Default is TRUE.
-#' @param deaths A matrix containing all unit death records in the form of
-#' \code{\link{ideaths}}.
-#' @param pop A list of list of matrices containing population numbers. This
-#' should be in the form of \code{\link{ipop}}.
-#' @return A demogdata object (if \code{cut!="ALL"}) or a list of demogdata
-#' objects (if \code{cut=="ALL"}). See \link[demography]{demogdata} for more
-#' information about demogdata objects.
+#' @param population Character code indicating which estimated residential 
+#' indigenous population should be used. \code{"cohort"} means use the ERP 
+#' obtained by linearly interpolating the 2001, 2006 and 2011 census figures 
+#' along cohorts. \code{"interpolated"} means use the ERP obtained by linearly 
+#' interpolating the 2001, 2006 and 2011 census figures along ages. 
+#' \code{"backcast"} means use the ABS ERP based on 2011 census values.
+#' @return A demogdata object containing mortality rates for males, females and total. 
+#' See \link[demography]{demogdata} for more information about demogdata objects.
 #' @author Rob J Hyndman <Rob.Hyndman@@monash.edu>
 #' @references Choi, C., Hyndman, R.J., Smith, L., and Zhao, K. (2010) \emph{An
 #' enhanced mortality database for estimating indigenous life expectancy}.
 #' Report for Australian Institute of Health and Welfare.
 #' @examples
 #' 
-#' nsw.M <- make.demogdata(state="NSW",cut="M")
-#' plot(nsw.M, "female")
+#' nsw <- make.demogdata(state="NSW")
+#' plot(nsw, "female")
 #' 
 #' # Show smoothing
-#' test <- make.demogdata(state="NSW", cut="M", sex="female", smooth=FALSE)
+#' test <- make.demogdata(state="NSW", smooth=FALSE)
 #' test.sm <- smooth.demogdata(test)
-#' plot(test, year=2006, type="p", pch=1)
-#' lines(test.sm, year=2006, col="red")
+#' plot(test, series='female', year=2006, type="p", pch=1)
+#' lines(test.sm, series='female', year=2006, col="red")
 #' 
 #' @export
+
+
 make.demogdata <- function(state=c("AUS","ACT","NSW","NT","QLD","SA","TAS","VIC","WA"),
-sex=c("ALL","female","male","total"), cut=c("ALL","M","H","A","N"),
-    year=NULL, aveyear=FALSE, upper.age=100, smooth=TRUE, deaths=indmortality::ideaths, pop=indmortality::ipop)
-{
-  cut <- match.arg(cut)
-  state <- match.arg(state)
-  sex <- match.arg(sex)
-  if(cut!="ALL")
-    return(make.demogdata.cut(deaths,pop,state,sex,cut,year,upper.age,smooth,aveyear))
-  # Otherwise continue with all cuts
-  out <- list()
-  cut <- c("M", "H", "A", "N")
-  for(i in 1:length(cut))
-    out[[i]] <- make.demogdata.cut(deaths,pop,state,sex,cut[i],year,upper.age,smooth,aveyear)
-  if(smooth) # Check rates increase with more deaths data. Should happen anyway for non-smoothed data
-  {
-    for(j in 1:length(out[[1]]$rate))
-      for(i in 2:length(cut))
-        out[[i]]$rate[[j]] <- pmax(out[[i-1]]$rate[[j]],out[[i]]$rate[[j]])
-  }
-  names(out) <- cut
-  return(structure(out,class="gdemogdata"))
-}
-
-#' @export
-make.demogdata.cut <- function(deaths, pop, state=c("NSW","VIC","QLD","WA","SA","TAS","ACT","NT","AUS"),
-    sex=c("ALL","female","male","total"), cut=c("M", "H", "A", "N"), year=NULL, upper.age=100, smooth=TRUE, aveyear=FALSE)
+year=2001:2010, aveyear=FALSE, upper.age=100, smooth=TRUE, population=c("cohort","interpolated","backcast"))
 {
   state <- match.arg(state)
-  cut <- match.arg(cut)
-  sex <- match.arg(sex)
+  population <- match.arg(population)
 
-  # Check years required and available
-  availableyears <- sort(unique(as.numeric(as.character(deaths$Year))))
-  if(is.null(year))
-    year <- availableyears
+  if(min(year) < 2001 | max(year) > 2010)
+    stop("year values must be between 2001 and 2010")
   else
-    year <- year[is.element(year,availableyears)]
+    year <- sort(unique(year))
 
-  # Get male deaths and pop
-  if(sex!="female")
-  {
-    mdeaths <- as.matrix(deathstable(state, "male",   cut, year, aveyear, upper.age, deaths=deaths))
-    upper.age <- nrow(mdeaths)-1
-    mpop <- pop[[state]][["male"]]
-    if(upper.age < nrow(mpop)-1)
-      mpop <- rbind(mpop[1:upper.age,,drop=FALSE],colSums(mpop[(upper.age+1):nrow(mpop),,drop=FALSE]))
-    else
-    {
-      upper.age <- nrow(mpop)-1
-      if(upper.age < nrow(mdeaths)-1)
-        mdeaths <- rbind(mdeaths[1:upper.age,,drop=FALSE],colSums(mdeaths[(upper.age+1):nrow(mdeaths),,drop=FALSE]))
-    }
-    ppop <- mpop
-  }
-  # Get female deaths and pop
-  if(sex!="male")
-  {
-    fdeaths <- as.matrix(deathstable(state, "female", cut, year, aveyear, upper.age, deaths=deaths))
-    upper.age <- nrow(fdeaths)-1
-    fpop <- pop[[state]][["female"]]
-    if(upper.age < nrow(fpop)-1)
-      fpop <- rbind(fpop[1:upper.age,,drop=FALSE],colSums(fpop[(upper.age+1):nrow(fpop),,drop=FALSE]))
-    else
-    {
-      upper.age <- nrow(fpop)-1
-      if(upper.age < nrow(fdeaths)-1)
-        fdeaths <- rbind(fdeaths[1:upper.age,,drop=FALSE],colSums(fdeaths[(upper.age+1):nrow(fdeaths),,drop=FALSE]))
-    }
-    ppop <- fpop
-  }
-  # Get total deaths
-  if(sex=="ALL" | sex=="total")
-    tdeaths <- mdeaths + fdeaths
-
-  # Assume last year population for all subsequent years
-  pyear <- as.numeric(colnames(ppop))
-  pyear <- c(pyear,max(pyear)+(1:50))
-  j <- pmin(ncol(ppop),which(is.element(pyear,year)))
+  # Get deaths
   if(aveyear)
-    year <- mean(year)
+  {
+    nyears <- length(year)
+    fdeaths <- as.matrix(deathstable(state, sex="female", year=year, upper.age=upper.age))/nyears
+    mdeaths <- as.matrix(deathstable(state, sex="male", year=year, upper.age=upper.age))/nyears
+  }
+  else
+  {
+    fdeaths <- mdeaths <- matrix(0, nrow=upper.age+1, ncol=length(year))
+    for(i in 1:length(year))
+    {
+      fdeaths[,i] <- as.matrix(deathstable(state, sex="female", year=year[i], upper.age=upper.age))
+      mdeaths[,i] <- as.matrix(deathstable(state, sex="male", year=year[i], upper.age=upper.age))
+    }
+  }
+  # Make sure deaths are non-negative
+  mdeaths <- pmax(mdeaths,0)
+  fdeaths <- pmax(fdeaths,0)
 
-  # Get female rates
-  if(sex!="male")
+  # Get population
+  if(population=="backcast")
+    pop <- ipop$Backcast
+  else if(population=="interpolated")
+    pop <- ipop$Interpolated
+  else
+    pop <- ipop$Cohort
+  pop <- subset(pop, State==state)
+  mpop <- subset(pop, Sex=="Male")
+  fpop <- subset(pop, Sex=="Female")
+  if(upper.age < 115)
   {
-    fpop <- fpop[,j,drop=FALSE]
-    if(aveyear)
-      fpop <- matrix(rowMeans(fpop),ncol=1)
-    frate <- as.matrix(fdeaths/fpop)
-    rownames(frate) <- rownames(fpop) <- paste(0:upper.age,c(rep("",upper.age),"+"),sep="")
+    mpop[upper.age+1,4:14] <- colSums(mpop[(upper.age+1):NROW(mpop),4:14])
+    mpop <- mpop[1:(upper.age+1),]
+    fpop[upper.age+1,4:14] <- colSums(fpop[(upper.age+1):NROW(fpop),4:14])
+    fpop <- fpop[1:(upper.age+1),]
   }
-  # Get male rates
-  if(sex!="female")
+  mpop <- as.matrix(mpop[,year-2001+4,drop=FALSE])
+  fpop <- as.matrix(fpop[,year-2001+4,drop=FALSE])
+
+  if(aveyear)
   {
-    mpop <- mpop[,j,drop=FALSE]
-    if(aveyear)
-      mpop <- matrix(rowMeans(mpop),ncol=1)
-    mrate <- as.matrix(mdeaths/mpop)
-    rownames(mrate) <- rownames(mpop) <- paste(0:upper.age,c(rep("",upper.age),"+"),sep="")
+    fpop <- as.matrix(rowSums(fpop))/nyears
+    mpop <- as.matrix(rowSums(mpop))/nyears
+    year <- mean(year)
   }
-  # Get total pop and rates
-  if(sex=="ALL" | sex=="total")
-  {
-    tpop <- fpop+mpop
-    trate <- as.matrix(tdeaths/tpop)
-    rownames(trate) <- rownames(tpop) <- paste(0:upper.age,c(rep("",upper.age),"+"),sep="")
-  }
+
+  # female rates
+  frate <- as.matrix(fdeaths/fpop)
+  frate[is.na(frate)] <- 0
+  frate[abs(frate)>1e10] <- 0
+  rownames(frate) <- rownames(fpop) <- paste(0:upper.age,c(rep("",upper.age),"+"),sep="")
+
+  # male rates
+  mrate <- as.matrix(mdeaths/mpop)
+  mrate[is.na(mrate)] <- 0
+  mrate[abs(mrate)>1e10] <- 0
+  rownames(mrate) <- rownames(mpop) <- paste(0:upper.age,c(rep("",upper.age),"+"),sep="")
+
+  # Total rates
+  tpop <- fpop+mpop
+  trate <- as.matrix((fdeaths+mdeaths)/tpop)
+  trate[is.na(trate)] <- 0
+  trate[abs(trate)>1e10] <- 0
+  rownames(trate) <- rownames(tpop) <- paste(0:upper.age,c(rep("",upper.age),"+"),sep="")
 
   # Construct demogdata object
-  if(sex=="female")
-    cut <- demogdata(frate,fpop,ages=0:upper.age,years=year,
-      type="mortality",label=paste("Indigenous",state,cut),name="female",lambda=0)
-  else if(sex=="male")
-    cut <- demogdata(mrate,mpop,ages=0:upper.age,years=year,
-      type="mortality",label=paste("Indigenous",state,cut),name="male",lambda=0)
-  else
-    cut <- demogdata(trate,tpop,ages=0:upper.age,years=year,
-      type="mortality",label=paste("Indigenous",state,cut),name="total",lambda=0)
+  out <- demogdata(trate,tpop,ages=0:upper.age,years=year,
+      type="mortality",label=paste("Indigenous",state),name="total",lambda=0)
 
-  if(sex=="ALL")
-  {
-    cut$rate$female <- frate
-    cut$rate$male <- mrate
-    cut$rate$total <- trate
-    cut$pop$female <- fpop
-    cut$pop$male <- mpop
-    cut$pop$total <- tpop
-  }
+  out$rate$female <- frate
+  out$rate$male <- mrate
+  out$pop$female <- fpop
+  out$pop$male <- mpop
 
   # Smooth rates
   if(smooth)
   {
-    smoothcut <- try(smooth.demogdata(cut,b=30,k=30), silent=TRUE)
-    if(class(smoothcut)=="try-error")
+    smoothout <- try(smooth.demogdata(out,b=25,k=30), silent=TRUE)
+    if(class(smoothout)=="try-error")
     {
-      smoothcut <- try(smooth.demogdata(cut,b=30,k=20), silent=TRUE)
-      if(class(smoothcut)=="try-error")
+      smoothout <- try(smooth.demogdata(out,b=25,k=20), silent=TRUE)
+      if(class(smoothout)=="try-error")
       {
-        smoothcut <- try(smooth.demogdata(cut,b=30,k=10), silent=TRUE)
-        if(class(smoothcut)=="try-error") # Give up
+        smoothout <- try(smooth.demogdata(out,b=25,k=10), silent=TRUE)
+        if(class(smoothout)=="try-error") # Give up
         {
           warning("Not enough available data to do any smoothing")
-          smoothcut <- cut
+          smoothout <- out
         }
       }
     }
-    return(smoothcut)
+    # Cap smoothed rates at 1.5
+    nl <- length(smoothout$rate)
+    for(i in seq(nl))
+      smoothout$rate[[i]] <- pmin(smoothout$rate[[i]], 1.50)
+    return(smoothout)
   }
   else
-    return(cut)
+    return(out)
 
 }
 

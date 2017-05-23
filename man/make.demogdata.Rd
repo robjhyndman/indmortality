@@ -5,62 +5,49 @@
 \title{Make demogdata objects for particular states and years.}
 \usage{
 make.demogdata(state = c("AUS", "ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC",
-  "WA"), sex = c("ALL", "female", "male", "total"), cut = c("ALL", "M", "H",
-  "A", "N"), year = NULL, aveyear = FALSE, upper.age = 100,
-  smooth = TRUE, deaths = indmortality::ideaths, pop = indmortality::ipop)
+  "WA"), year = 2001:2010, aveyear = FALSE, upper.age = 100,
+  smooth = TRUE, population = c("cohort", "interpolated", "backcast"))
 }
 \arguments{
 \item{state}{Character code indicating state or territory of Australia, or
 "AUS" indicating the whole of Australia.}
 
-\item{sex}{If "ALL", the function will return all sexes as part of each
-demogdata object. Otherwise the function will return only the sex indicated.}
-
-\item{cut}{Which cut of data to use. If "ALL", then a list of demogdata
-objects is returned.}
-
 \item{year}{Years to include in the demogdata object. The default is to
-include all available years from the deaths matrix.}
+include all available years from the \link{ideaths} database.}
 
-\item{aveyear}{Logical value indicating whether results should be averaged
-across years. Default is FALSE.}
+\item{aveyear}{Logical value indicating whether deaths and population numbers
+should be averaged across years. Default is FALSE.}
 
 \item{upper.age}{Upper age group, by default set to 100+.}
 
 \item{smooth}{Logical value indicating whether mortality rates should be
 smoothed using penalized regression splines. Default is TRUE.}
 
-\item{deaths}{A matrix containing all unit death records in the form of
-\code{\link{ideaths}}.}
-
-\item{pop}{A list of list of matrices containing population numbers. This
-should be in the form of \code{\link{ipop}}.}
+\item{population}{Character code indicating which estimated residential 
+indigenous population should be used. \code{"cohort"} means use the ERP 
+obtained by linearly interpolating the 2001, 2006 and 2011 census figures 
+along cohorts. \code{"interpolated"} means use the ERP obtained by linearly 
+interpolating the 2001, 2006 and 2011 census figures along ages. 
+\code{"backcast"} means use the ABS ERP based on 2011 census values.}
 }
 \value{
-A demogdata object (if \code{cut!="ALL"}) or a list of demogdata
-objects (if \code{cut=="ALL"}). See \link[demography]{demogdata} for more
-information about demogdata objects.
+A demogdata object containing mortality rates for males, females and total. 
+See \link[demography]{demogdata} for more information about demogdata objects.
 }
 \description{
-The function \code{make.demogdata} will return a demogdata object if
-\code{cut!="ALL"}. Otherwise it returns a list of demogdata objects for all
-cuts for a particular state.
-}
-\details{
-If there are more years of deaths than years of population, then the last
-year of available population data is used to compute the rates for
-subsequent years.
+The function \code{make.demogdata} will return a demogdata object 
+for the given state and years.
 }
 \examples{
 
-nsw.M <- make.demogdata(state="NSW",cut="M")
-plot(nsw.M, "female")
+nsw <- make.demogdata(state="NSW")
+plot(nsw, "female")
 
 # Show smoothing
-test <- make.demogdata(state="NSW", cut="M", sex="female", smooth=FALSE)
+test <- make.demogdata(state="NSW", smooth=FALSE)
 test.sm <- smooth.demogdata(test)
-plot(test, year=2006, type="p", pch=1)
-lines(test.sm, year=2006, col="red")
+plot(test, series='female', year=2006, type="p", pch=1)
+lines(test.sm, series='female', year=2006, col="red")
 
 }
 \references{

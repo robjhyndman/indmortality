@@ -77,7 +77,7 @@ simulate.demogdata <- function(object, nsim=1, seed=NULL, sigma=0.0295, ...)
     on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
   }
 
-  for(i in 1:length(object$rate))
+  for(i in seq_along(object$rate))
   {
     origrates <- object$rate[[i]]
 
@@ -97,20 +97,3 @@ simulate.demogdata <- function(object, nsim=1, seed=NULL, sigma=0.0295, ...)
   return(object)
 }
 
-simulate.gdemogdata <- function(object, nsim=1, seed=NULL, ...)
-{
-  if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
-    runif(1)
-  if(is.null(seed))
-    RNGstate <- get(".Random.seed", envir = .GlobalEnv)
-  else
-  {
-    R.seed <- get(".Random.seed", envir = .GlobalEnv)
-    set.seed(seed)
-    RNGstate <- structure(seed, kind = as.list(RNGkind()))
-    on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
-  }
-  for(i in 1:length(object))
-    object[[i]] <- simulate(object[[i]])
-  return(object)
-}

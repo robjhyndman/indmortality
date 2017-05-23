@@ -4,22 +4,26 @@
 \name{ideaths}
 \alias{ideaths}
 \title{Database of all deaths with indigenous classification in Australia from
-2001-2007.}
-\format{A data frame with 16625 observations on the following six variables:
+2001-2010.}
+\format{A data frame with 1,357,538 observations on the following eight variables:
 \describe{ \item{list("State")}{a factor with levels \code{ACT}, \code{NSW},
 \code{NT}, \code{QLD}, \code{SA}, \code{TAS}, \code{VIC}, \code{WA}.}
-\item{list("Year")}{a numeric vector indicating year of registration.}
-\item{list("Deathyear")}{a numeric vector indicating year of death.}
-\item{list("Sex")}{a factor with levels \code{F} and \code{M}.}
+\item{list("Sex")}{a factor with levels \code{Female} and \code{Male}.}
 \item{list("Age")}{a numeric vector indicating age at death.}
-\item{list("Cut")}{a factor with levels \code{M}, \code{H}, \code{A} and
-\code{N} indicating the database where the death was first recorded
-(treating the levels in order).} }}
+\item{list("RegYear")}{an integer vector indicating year of registration.}
+\item{list("Deathyear")}{an integer vector indicating year of death.}
+\item{\code{Indigenous}}{a factor with three levels: 
+  \code{N} (non-indigenous), \code{Y} (indigenous), and \code{U} (unknown).}
+\item{\code{Linked}}{a logical variable indicating if the death was linked on 
+data sets in addition to the NDI.}
+\item{\code{Misclassified}}{A logical variable indicating if the death has 
+been misclassified as non-Indigenous or ``Unknown'' on the NDI.}
+}}
 \description{
-Database constructed by linking National Mortality Database, hospital
-records, residential aged care records and neonatal records. The
-\code{ideaths} matrix was formed using the \code{\link{read.deaths}} command
-using the data set available on 22 November 2011.
+Database constructed from NDI with state, age and sex information. 
+Each death is classified as Indigenous/Non-Indigenous/Unknown and Linked/Unlinked. 
+In addition, Indigenous deaths have been flagged if they have been misclassified 
+as Non-Indigenous or Unknown.
 }
 \examples{
 

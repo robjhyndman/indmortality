@@ -23,25 +23,20 @@ expectancies.}
 \item{sigma}{Value of sigma used in PES estimate for simulations.}
 }
 \value{
-An array containing life expectancies for each year, age, sex and
-cut contained in \code{object}.
+An array containing life expectancies for each year, age, and sex 
+contained in \code{object}.
 }
 \description{
 \code{life.expectancy.mean} calculates life expectancies and
 \code{life.expectancy.ci} computes confidence intervals for life
 expectancies. The functions take the output from
-\code{\link{make.demogdata}} and returns life expectancy results for all
-populations for the specified ages.
-}
-\details{
-The life expectancy is calculated using a life table approach based on the
-mortality rates in \code{object}.
+\code{\link{make.demogdata}} and returns life expectancy results for 
+both sexes and all years for the specified ages.
 }
 \examples{
 
-nsw.nmd <- make.demogdata(state="NSW", cut="M", aveyear=TRUE)
-life.expectancy.mean(nsw.nmd)
-life.expectancy.ci(nsw.nmd)
+life.expectancy.mean(nsw)
+life.expectancy.ci(nsw)
 
 }
 \references{

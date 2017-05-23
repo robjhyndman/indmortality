@@ -2,7 +2,5 @@
 
 S3method(simulate,demogdata)
 export(deathstable)
-export(life.expectancy.ci)
 export(life.expectancy.mean)
 export(make.demogdata)
-export(make.demogdata.cut)
