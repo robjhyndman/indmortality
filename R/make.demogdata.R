@@ -71,14 +71,14 @@ year=2001:2010, aveyear=FALSE, upper.age=100, smooth=TRUE, population=c("cohort"
 
   # Get population
   if(population=="backcast")
-    pop <- ipop$Backcast
+    pop <- indmortality2::ipop$Backcast
   else if(population=="interpolated")
-    pop <- ipop$Interpolated
+    pop <- indmortality2::ipop$Interpolated
   else
-    pop <- ipop$Cohort
-  pop <- subset(pop, State==state)
-  mpop <- subset(pop, Sex=="Male")
-  fpop <- subset(pop, Sex=="Female")
+    pop <- indmortality2::ipop$Cohort
+  pop <- subset(pop, pop$State==state)
+  mpop <- subset(pop, pop$Sex=="Male")
+  fpop <- subset(pop, pop$Sex=="Female")
   if(upper.age < 115)
   {
     mpop[upper.age+1,4:14] <- colSums(mpop[(upper.age+1):NROW(mpop),4:14])

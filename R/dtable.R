@@ -38,20 +38,20 @@ deathstable <- function(
   sex <- match.arg(sex)
 
   # Maximum age at death
-  maxage <- max(ideaths$Age,na.rm=TRUE)
+  maxage <- max(indmortality2::ideaths$Age,na.rm=TRUE)
 
   # Make a copy of ideaths to subset
-  deaths <- ideaths
+  deaths <- indmortality2::ideaths
 
   # Subset data on state
   if(state != "AUS")
-    deaths <- subset(deaths,State==toupper(state))
+    deaths <- subset(deaths, deaths$State==toupper(state))
 
   # Subset data on sex
   if(sex=="male")
-    deaths <- subset(deaths,Sex=="Male")
+    deaths <- subset(deaths,deaths$Sex=="Male")
   else if(sex=="female")
-    deaths <- subset(deaths,Sex=="Female")
+    deaths <- subset(deaths,deaths$Sex=="Female")
 
   # Create year as a factor
   deaths$Year <- as.factor(deaths$RegYear)
@@ -101,7 +101,7 @@ deathstable <- function(
   linked <- apply(linked,2,distribute.deaths.vec)
 
   # Add in mis-classified deaths
-  misclass <- subset(deaths, Misclassified)
+  misclass <- subset(deaths, deaths$Misclassified)
   tabmiss <- stats::xtabs(~ age1 + Indigenous, data = misclass)
   # Distribute missing ages across other ages proportionally
   tabmiss <- apply(tabmiss,2:length(dim(tabmiss)),distribute.deaths.vec)
