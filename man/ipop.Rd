@@ -8,41 +8,41 @@
 ABS Cat 3238.0
 }
 \description{
-This is a list of data frames each containing indigenous estimated 
-resident population (ERP) data, by state, sex and single-year of age, 
+This is a list of data frames each containing indigenous estimated
+resident population (ERP) data, by state, sex and single-year of age,
 from 0 to 115.
 }
 \details{
-The first data frame contains cohort-interpolated Indigeneous ERP, 
-estimated from the 2001, 2006 and 2011 Census-based Indigenous ERPs. 
+The first data frame contains cohort-interpolated Indigeneous ERP,
+estimated from the 2001, 2006 and 2011 Census-based Indigenous ERPs.
 Interpolation is linear between years for each cohort.
 
-The second data frame contains age-interpolated Indigeneous ERP, 
-estimated from the 2001, 2006 and 2011 Census-based Indigenous ERPs. 
+The second data frame contains age-interpolated Indigeneous ERP,
+estimated from the 2001, 2006 and 2011 Census-based Indigenous ERPs.
 Interpolation is linear between years for each age.
 
-The third data frame contains backcasts of 2011 census-based Indigenous ERPs. 
-For each state, the total populations are split into males and females using 
-the sex ratios for each age computed from averaged census populations for 
+The third data frame contains backcasts of 2011 census-based Indigenous ERPs.
+For each state, the total populations are split into males and females using
+the sex ratios for each age computed from averaged census populations for
 2001, 2006 and 2011.
 
-Each data frame contains columns \code{State}, \code{Sex}, \code{Age}, 
+Each data frame contains columns \code{State}, \code{Sex}, \code{Age},
 \code{2001}, ... \code{2011}.
 }
 \examples{
 
-plot(0:115, 
+plot(0:115,
   subset(ipop$Backcast, State=="NT" & Sex=="Male")[,"2003"],
-  type="l", 
-  xlab="Age", 
+  type="l",
+  xlab="Age",
   ylab="Population",
-  main="Northern Territory Male 2003", 
+  main="Northern Territory Male 2003",
   col="blue")
-lines(0:115, 
-  subset(ipop$Interpolated, State=="NT" & Sex=="Male")[,"2003"], 
+lines(0:115,
+  subset(ipop$Interpolated, State=="NT" & Sex=="Male")[,"2003"],
   col="red")
-lines(0:115, 
-  subset(ipop$Cohort, State=="NT" & Sex=="Male")[,"2003"], 
+lines(0:115,
+  subset(ipop$Cohort, State=="NT" & Sex=="Male")[,"2003"],
   col="green")
 
 legend("topright",

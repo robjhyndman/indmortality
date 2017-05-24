@@ -1,8 +1,8 @@
 #' Make demogdata objects for particular states and years.
-#' 
-#' The function \code{make.demogdata} will return a demogdata object 
+#'
+#' The function \code{make.demogdata} will return a demogdata object
 #' for the given state and years.
-#' 
+#'
 #' @param state Character code indicating state or territory of Australia, or
 #' "AUS" indicating the whole of Australia.
 #' @param year Years to include in the demogdata object. The default is to
@@ -12,29 +12,29 @@
 #' @param upper.age Upper age group, by default set to 100+.
 #' @param smooth Logical value indicating whether mortality rates should be
 #' smoothed using penalized regression splines. Default is TRUE.
-#' @param population Character code indicating which estimated residential 
-#' indigenous population should be used. \code{"cohort"} means use the ERP 
-#' obtained by linearly interpolating the 2001, 2006 and 2011 census figures 
-#' along cohorts. \code{"interpolated"} means use the ERP obtained by linearly 
-#' interpolating the 2001, 2006 and 2011 census figures along ages. 
+#' @param population Character code indicating which estimated residential
+#' indigenous population should be used. \code{"cohort"} means use the ERP
+#' obtained by linearly interpolating the 2001, 2006 and 2011 census figures
+#' along cohorts. \code{"interpolated"} means use the ERP obtained by linearly
+#' interpolating the 2001, 2006 and 2011 census figures along ages.
 #' \code{"backcast"} means use the ABS ERP based on 2011 census values.
-#' @return A demogdata object containing mortality rates for males, females and total. 
+#' @return A demogdata object containing mortality rates for males, females and total.
 #' See \link[demography]{demogdata} for more information about demogdata objects.
 #' @author Rob J Hyndman <Rob.Hyndman@@monash.edu>
 #' @references Choi, C., Hyndman, R.J., Smith, L., and Zhao, K. (2010) \emph{An
 #' enhanced mortality database for estimating indigenous life expectancy}.
 #' Report for Australian Institute of Health and Welfare.
 #' @examples
-#' 
+#'
 #' nsw <- make.demogdata(state="NSW")
 #' plot(nsw, "female")
-#' 
+#'
 #' # Show smoothing
 #' test <- make.demogdata(state="NSW", smooth=FALSE)
-#' test.sm <- smooth.demogdata(test)
+#' test.sm <- demography::smooth.demogdata(test)
 #' plot(test, series='female', year=2006, type="p", pch=1)
 #' lines(test.sm, series='female', year=2006, col="red")
-#' 
+#'
 #' @export
 
 
@@ -127,13 +127,13 @@ year=2001:2010, aveyear=FALSE, upper.age=100, smooth=TRUE, population=c("cohort"
   # Smooth rates
   if(smooth)
   {
-    smoothout <- try(smooth.demogdata(out,b=25,k=30), silent=TRUE)
+    smoothout <- try(demography::smooth.demogdata(out,b=25,k=30), silent=TRUE)
     if(class(smoothout)=="try-error")
     {
-      smoothout <- try(smooth.demogdata(out,b=25,k=20), silent=TRUE)
+      smoothout <- try(demography::smooth.demogdata(out,b=25,k=20), silent=TRUE)
       if(class(smoothout)=="try-error")
       {
-        smoothout <- try(smooth.demogdata(out,b=25,k=10), silent=TRUE)
+        smoothout <- try(demography::smooth.demogdata(out,b=25,k=10), silent=TRUE)
         if(class(smoothout)=="try-error") # Give up
         {
           warning("Not enough available data to do any smoothing")

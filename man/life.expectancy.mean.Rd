@@ -3,10 +3,14 @@
 \name{life.expectancy.mean}
 \alias{life.expectancy.mean}
 \alias{life.expectancy.ci}
+\alias{life.expectancy.ci}
 \title{Calculate life expectancies for both sexes and all cuts of the deaths
 matrix.}
 \usage{
 life.expectancy.mean(object, ages = c(0, 20, 45, 65))
+
+life.expectancy.ci(object, ages = c(0, 20, 45, 65), nsim = 250,
+  level = 95, smooth = FALSE, sigma = 0.0295)
 }
 \arguments{
 \item{object}{Output from \code{\link{make.demogdata}}.}
@@ -23,14 +27,14 @@ expectancies.}
 \item{sigma}{Value of sigma used in PES estimate for simulations.}
 }
 \value{
-An array containing life expectancies for each year, age, and sex 
+An array containing life expectancies for each year, age, and sex
 contained in \code{object}.
 }
 \description{
 \code{life.expectancy.mean} calculates life expectancies and
 \code{life.expectancy.ci} computes confidence intervals for life
 expectancies. The functions take the output from
-\code{\link{make.demogdata}} and returns life expectancy results for 
+\code{\link{make.demogdata}} and returns life expectancy results for
 both sexes and all years for the specified ages.
 }
 \examples{

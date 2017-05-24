@@ -1,12 +1,12 @@
 #' Calculate life expectancies for both sexes and all cuts of the deaths
 #' matrix.
-#' 
+#'
 #' \code{life.expectancy.mean} calculates life expectancies and
 #' \code{life.expectancy.ci} computes confidence intervals for life
 #' expectancies. The functions take the output from
-#' \code{\link{make.demogdata}} and returns life expectancy results for 
+#' \code{\link{make.demogdata}} and returns life expectancy results for
 #' both sexes and all years for the specified ages.
-#' 
+#'
 #' @aliases life.expectancy.mean life.expectancy.ci
 #' @param object Output from \code{\link{make.demogdata}}.
 #' @param ages Ages for which life expectancy is required.
@@ -15,7 +15,7 @@
 #' @param smooth If TRUE, smoothing will be used before computing life
 #' expectancies.
 #' @param sigma Value of sigma used in PES estimate for simulations.
-#' @return An array containing life expectancies for each year, age, and sex 
+#' @return An array containing life expectancies for each year, age, and sex
 #' contained in \code{object}.
 #' @author Rob J Hyndman <Rob.Hyndman@@monash.edu>
 #' @seealso \link[demography]{life.expectancy}
@@ -23,10 +23,10 @@
 #' enhanced mortality database for estimating indigenous life expectancy}.
 #' Report for Australian Institute of Health and Welfare.
 #' @examples
-#' 
+#'
 #' life.expectancy.mean(nsw)
 #' life.expectancy.ci(nsw)
-#' 
+#'
 #' @export
 
 life.expectancy.mean <- function(object,ages=c(0,20,45,65))
@@ -39,7 +39,7 @@ life.expectancy.mean <- function(object,ages=c(0,20,45,65))
   for(i in 1:length(ages))
   {
     for(j in 1:length(object$rate))
-      out[i,,j] <- life.expectancy(object,series=names(object$rate)[j],age=ages[i])
+      out[i,,j] <- demography::life.expectancy(object,series=names(object$rate)[j],age=ages[i])
   }
   dimnames(out) <- list(as.character(ages), as.character(object$year), names(object$rate))
 
@@ -49,6 +49,10 @@ life.expectancy.mean <- function(object,ages=c(0,20,45,65))
 
   return(out)
 }
+
+
+#' @rdname life.expectancy.mean
+#' @export
 
 life.expectancy.ci <- function(object, ages=c(0,20,45,65), nsim=250, level=95, smooth=FALSE,
   sigma=0.0295)
@@ -70,12 +74,12 @@ life.expectancy.ci <- function(object, ages=c(0,20,45,65), nsim=250, level=95, s
   newobj <- list()
   for(i in 1:nsim)
   {
-    newobj <- simulate(object, sigma=sigma)
+    newobj <- simulate.demogdata(object, sigma=sigma)
     if(smooth)
-      newobj <- smooth.demogdata(newobj)
+      newobj <- demography::smooth.demogdata(newobj)
     out[,,,i] <- life.expectancy.mean(newobj,ages=ages)
   }
-  out <- aperm(apply(out,1:3,quantile,prob=0.5 + c(-.5,.5)*level),c(2:4,1))
+  out <- aperm(apply(out,1:3,stats::quantile,prob=0.5 + c(-.5,.5)*level),c(2:4,1))
   dimnames(out) <- list(as.character(ages),as.character(object$year), names(object$rate),
     paste(level*100,c("% Lower","% Upper"),sep=""))
 

@@ -2,5 +2,8 @@
 
 S3method(simulate,demogdata)
 export(deathstable)
+export(life.expectancy.ci)
 export(life.expectancy.mean)
 export(make.demogdata)
+import(demography)
+importFrom(stats,simulate)

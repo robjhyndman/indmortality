@@ -22,17 +22,17 @@ group.}
 A numerical vector with death counts in each cell.
 }
 \description{
-Returns vector of total deaths by single-year of age. 
-Deaths are counted using the method adopted for the 
-``Enhanced Mortality Database'', adjusting for the 
-under-identification of Indigenous deaths on the 
+Returns vector of total deaths by single-year of age.
+Deaths are counted using the method adopted for the
+``Enhanced Mortality Database'', adjusting for the
+under-identification of Indigenous deaths on the
 National Death Index.
 }
 \examples{
 
-tab1 <- deathstable(sex="female")
-tab2 <- deathstable(state="VIC", cut="H", aveyear=TRUE)
-tab3 <- deathstable()
+vicfdeaths2010 <- deathstable(state="VIC", sex="female", year=2010)
+plot(0:115, vicfdeaths2010, xlab="Age", ylab="Number of deaths",
+  main="Indigenous deaths in Victoria: females 2010")
 
 }
 \references{

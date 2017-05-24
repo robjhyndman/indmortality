@@ -23,19 +23,19 @@ should be averaged across years. Default is FALSE.}
 \item{smooth}{Logical value indicating whether mortality rates should be
 smoothed using penalized regression splines. Default is TRUE.}
 
-\item{population}{Character code indicating which estimated residential 
-indigenous population should be used. \code{"cohort"} means use the ERP 
-obtained by linearly interpolating the 2001, 2006 and 2011 census figures 
-along cohorts. \code{"interpolated"} means use the ERP obtained by linearly 
-interpolating the 2001, 2006 and 2011 census figures along ages. 
+\item{population}{Character code indicating which estimated residential
+indigenous population should be used. \code{"cohort"} means use the ERP
+obtained by linearly interpolating the 2001, 2006 and 2011 census figures
+along cohorts. \code{"interpolated"} means use the ERP obtained by linearly
+interpolating the 2001, 2006 and 2011 census figures along ages.
 \code{"backcast"} means use the ABS ERP based on 2011 census values.}
 }
 \value{
-A demogdata object containing mortality rates for males, females and total. 
+A demogdata object containing mortality rates for males, females and total.
 See \link[demography]{demogdata} for more information about demogdata objects.
 }
 \description{
-The function \code{make.demogdata} will return a demogdata object 
+The function \code{make.demogdata} will return a demogdata object
 for the given state and years.
 }
 \examples{
@@ -45,7 +45,7 @@ plot(nsw, "female")
 
 # Show smoothing
 test <- make.demogdata(state="NSW", smooth=FALSE)
-test.sm <- smooth.demogdata(test)
+test.sm <- demography::smooth.demogdata(test)
 plot(test, series='female', year=2006, type="p", pch=1)
 lines(test.sm, series='female', year=2006, col="red")
 

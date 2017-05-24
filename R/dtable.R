@@ -3,29 +3,29 @@
 
 
 #' Function to make deaths tables for subsets of data.
-#' 
-#' Returns vector of total deaths by single-year of age. 
-#' Deaths are counted using the method adopted for the 
-#' ``Enhanced Mortality Database'', adjusting for the 
-#' under-identification of Indigenous deaths on the 
+#'
+#' Returns vector of total deaths by single-year of age.
+#' Deaths are counted using the method adopted for the
+#' ``Enhanced Mortality Database'', adjusting for the
+#' under-identification of Indigenous deaths on the
 #' National Death Index.
-#' 
+#'
 #' @param state The function will return all deaths from the state indicated.
 #' @param sex The function will return all deaths from the sex indicated.
 #' @param year Which years to be counted. Default is all available years.
 #' @param upper.age Deaths are cumulated for higher ages into this upper age
 #' group.
-#' @return A numerical vector with death counts in each cell. 
+#' @return A numerical vector with death counts in each cell.
 #' @author Rob J Hyndman <Rob.Hyndman@@monash.edu>
 #' @references Choi, C., Hyndman, R.J., Smith, L., and Zhao, K. (2010) \emph{An
 #' enhanced mortality database for estimating indigenous life expectancy}.
 #' Report for Australian Institute of Health and Welfare.
 #' @examples
-#' 
-#' tab1 <- deathstable(sex="female")
-#' tab2 <- deathstable(state="VIC", cut="H", aveyear=TRUE)
-#' tab3 <- deathstable()
-#' 
+#'
+#' vicfdeaths2010 <- deathstable(state="VIC", sex="female", year=2010)
+#' plot(0:115, vicfdeaths2010, xlab="Age", ylab="Number of deaths",
+#'   main="Indigenous deaths in Victoria: females 2010")
+#'
 #' @export
 deathstable <- function(
   state=c("AUS","ACT","NSW","NT","QLD","SA","TAS","VIC","WA"),
@@ -87,7 +87,7 @@ deathstable <- function(
     stop("No deaths selected")
 
   # Sum up data by age, indigenous, linked (i.e., total over sex, state and year)
-  tab <- xtabs(~ age1 + Indigenous + Linked, data = deaths)
+  tab <- stats::xtabs(~ age1 + Indigenous + Linked, data = deaths)
 
   ##################################################################
   ###### Now follow spreadsheet logic
@@ -102,7 +102,7 @@ deathstable <- function(
 
   # Add in mis-classified deaths
   misclass <- subset(deaths, Misclassified)
-  tabmiss <- xtabs(~ age1 + Indigenous, data = misclass)
+  tabmiss <- stats::xtabs(~ age1 + Indigenous, data = misclass)
   # Distribute missing ages across other ages proportionally
   tabmiss <- apply(tabmiss,2:length(dim(tabmiss)),distribute.deaths.vec)
   misclassN <- tabmiss[,"N"]
@@ -127,8 +127,8 @@ deathstable <- function(
   ###### Calculating gains/losses
 
   # Sum up data by age, indigenous (i.e., total over sex, state and year)
-  tabg <- xtabs(~ age1 + Indigenous, data = gains)
-  tabl <- xtabs(~ age1 + Indigenous, data = losses)
+  tabg <- stats::xtabs(~ age1 + Indigenous, data = gains)
+  tabl <- stats::xtabs(~ age1 + Indigenous, data = losses)
   netloss <- tabl-tabg
 
   ###### Adjusting for net gains/losses

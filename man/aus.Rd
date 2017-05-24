@@ -11,11 +11,11 @@
 \alias{wa}
 \title{Lists of demogdata objects for all Australian states, 2001-2007}
 \description{
-Objects: \code{aus}, \code{nsw}, \code{vic}, \code{sa}, \code{wa}, 
-\code{nt}, and \code{qld}. 
+Objects: \code{aus}, \code{nsw}, \code{vic}, \code{sa}, \code{wa},
+\code{nt}, and \code{qld}.
 Note that there is insufficient data to produce similar objects for Tasmania and the ACT.
-These are demogdata objects, based on backcast population estimates. 
-The rates are smoothed over age using \code{\link[demography]{smooth.demogdata}}. 
+These are demogdata objects, based on backcast population estimates.
+The rates are smoothed over age using \code{\link[demography]{smooth.demogdata}}.
 For information about demogdata objects, see \code{\link[demography]{demogdata}}.
 }
 \details{

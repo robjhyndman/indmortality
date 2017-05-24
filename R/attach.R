@@ -1,5 +1,5 @@
 .onAttach <- function(...)
 {
-  version <- packageVersion("indmortality2")
-  packageStartupMessage(paste("This is indmortality",version,"\n"))
+  version <- utils::packageVersion("indmortality2")
+  base::packageStartupMessage(paste("This is indmortality",version,"\n"))
 }
