@@ -1,6 +1,7 @@
-#indmortality
+indmortality2
+=======================
 
-Indigenous mortality R package developed for the Australian Institute of Health and Welfare
+Indigenous mortality R package developed for the Australian Institute of Health and Welfare (version 2)
 
 
 ## Installation
