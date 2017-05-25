@@ -5,7 +5,7 @@
 \title{Make demogdata objects for particular states and years.}
 \usage{
 make.demogdata(state = c("AUS", "ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC",
-  "WA"), year = 2001:2010, aveyear = FALSE, upper.age = 100,
+  "WA"), year = 2001:2010, combineyears = FALSE, upper.age = 100,
   smooth = TRUE, population = c("cohort", "interpolated", "backcast"))
 }
 \arguments{
@@ -15,8 +15,8 @@ make.demogdata(state = c("AUS", "ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC",
 \item{year}{Years to include in the demogdata object. The default is to
 include all available years from the \link{ideaths} database.}
 
-\item{aveyear}{Logical value indicating whether deaths and population numbers
-should be averaged across years. Default is FALSE.}
+\item{combineyears}{Logical value indicating whether deaths and population numbers
+should be combined across years. Default is FALSE.}
 
 \item{upper.age}{Upper age group, by default set to 100+.}
 

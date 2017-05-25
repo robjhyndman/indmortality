@@ -7,8 +7,8 @@
 #' "AUS" indicating the whole of Australia.
 #' @param year Years to include in the demogdata object. The default is to
 #' include all available years from the \link{ideaths} database.
-#' @param aveyear Logical value indicating whether deaths and population numbers
-#' should be averaged across years. Default is FALSE.
+#' @param combineyears Logical value indicating whether deaths and population numbers
+#' should be combined across years. Default is FALSE.
 #' @param upper.age Upper age group, by default set to 100+.
 #' @param smooth Logical value indicating whether mortality rates should be
 #' smoothed using penalized regression splines. Default is TRUE.
@@ -39,7 +39,7 @@
 
 
 make.demogdata <- function(state=c("AUS","ACT","NSW","NT","QLD","SA","TAS","VIC","WA"),
-year=2001:2010, aveyear=FALSE, upper.age=100, smooth=TRUE, population=c("cohort","interpolated","backcast"))
+year=2001:2010, combineyears=FALSE, upper.age=100, smooth=TRUE, population=c("cohort","interpolated","backcast"))
 {
   state <- match.arg(state)
   population <- match.arg(population)
@@ -50,11 +50,11 @@ year=2001:2010, aveyear=FALSE, upper.age=100, smooth=TRUE, population=c("cohort"
     year <- sort(unique(year))
 
   # Get deaths
-  if(aveyear)
+  if(combineyears)
   {
     nyears <- length(year)
-    fdeaths <- as.matrix(deathstable(state, sex="female", year=year, upper.age=upper.age))/nyears
-    mdeaths <- as.matrix(deathstable(state, sex="male", year=year, upper.age=upper.age))/nyears
+    fdeaths <- as.matrix(deathstable(state, sex="female", year=year, upper.age=upper.age))
+    mdeaths <- as.matrix(deathstable(state, sex="male", year=year, upper.age=upper.age))
   }
   else
   {
@@ -89,10 +89,10 @@ year=2001:2010, aveyear=FALSE, upper.age=100, smooth=TRUE, population=c("cohort"
   mpop <- as.matrix(mpop[,year-2001+4,drop=FALSE])
   fpop <- as.matrix(fpop[,year-2001+4,drop=FALSE])
 
-  if(aveyear)
+  if(combineyears)
   {
-    fpop <- as.matrix(rowSums(fpop))/nyears
-    mpop <- as.matrix(rowSums(mpop))/nyears
+    fpop <- as.matrix(rowSums(fpop))
+    mpop <- as.matrix(rowSums(mpop))
     year <- mean(year)
   }
 
